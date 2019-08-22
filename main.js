@@ -1,10 +1,28 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
+const showNotif = require('./notif')
 const path = require('path')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+
+let shouldQuit = false
+app.on('before-quit', function (e) {
+  console.log('before-quit()')
+
+  if (!shouldQuit) {
+    for (var i = 0; i < 20; i++) {
+      showNotif()
+    }
+
+    setTimeout(() => {
+      shouldQuit = true
+      app.quit();
+    }, 1000)
+    e.preventDefault()
+  }
+})
 
 function createWindow () {
   // Create the browser window.
@@ -12,7 +30,8 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
     }
   })
 
